@@ -61,7 +61,12 @@ Picture
     stx COLUBK              ; set background color
     stx PF1                 ; set playfield1
     stx PF2                 ; set playfield2 (notice in the image how it's reversed)
-    stx PF0                 ; set playfield0 (notice it's reversed and only the high nibble)
+    stx PF0                 ; set playfield0 (notice it's reversed and only the high nibble used)
+
+    REPEAT 7        ; messing up with the playfield in the middle of the scanline
+        nop         ; 
+    REPEND          ; 
+    inc PF1         ;
 
     inx                     ; increment x
     sta PATTERN
