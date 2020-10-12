@@ -59,6 +59,7 @@ VerticalBlank
 ; start picture 
 Picture
     stx COLUBK              ; set background color
+    
     stx PF1                 ; set playfield1
     stx PF2                 ; set playfield2 (notice in the image how it's reversed)
     stx PF0                 ; set playfield0 (notice it's reversed and only the high nibble used)
