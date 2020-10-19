@@ -26,7 +26,7 @@ Clear
 ;-------------------------------------------------- one time initialization
 C_PF_BACKGROUND_WALL = $ff            ; pattern of the playfield when we want the top of the box
 C_PF_BACKGROUND_SIDE = %00010000      ; pattern of the playfield when we want the side of the box
-CTRLPF_MIRROR = %00000001
+CTRLPF_MIRROR = %00000000
 
     lda #$46        ; 
     sta COLUPF      ; set playfield color to red-ish $46
@@ -61,45 +61,32 @@ VerticalBlank
 
 ;-------------------------------------------------- start picture
 
-
+    ldy #0
 Picture
     ; 76 cycles per scanline 
-    
-    lda #C_PF_BACKGROUND_WALL
-    sta PF0                 ; set playfield0 (notice it's reversed and only the high nibble used)
-    sta PF1                 ; set playfield1
-    sta PF2                 ; set playfield2 (notice how the image is reversed)
-Top
-    inx
-    stx COLUBK
-    sta WSYNC
-    cpx #8
-    bne Top
-
-    lda #C_PF_BACKGROUND_SIDE
-    sta PF0
-    lda #0
+   
+    lda ImagePF0,y
+    sta PF0                 ; set playfield0
+    lda ImagePF1,y
     sta PF1
-    sta PF2   
-Middle
-    inx
-    stx COLUBK
-    sta WSYNC
-    cpx #176
-    bne Middle
-    
-    lda #C_PF_BACKGROUND_WALL
-    sta PF0
-    sta PF1
+    lda ImagePF2,y
     sta PF2
-Bottom
-    inx
-    stx COLUBK
-    sta WSYNC               ; wait for scanline to finish
-    cpx #192                ; compare and sets zero flag if x == 192
-    bne Bottom              ; jump if not zero
 
-;------------------------------------------------- end picture
+    inx
+
+    txa
+
+    and #7
+    cmp #7
+    bne noIncy   ; here we could generate a one or cero (base if we need to improve or not) and use that to increment y ? 
+    iny
+noIncy
+
+    sta WSYNC
+    cpx #192
+    bne Picture
+ 
+ ;------------------------------------------------- end picture
 
     lda #2
     sta VBLANK  ; start VBLANK period
@@ -112,6 +99,12 @@ Bottom
     jmp StartOfFrame
 ;-------------------------------------------------- end frame
 
+
+;; Data Tables
+    include "image1.asm"
+
+
+;-------------------------------------------------- pointers
     ORG $FFFA
 
     .word Reset     ; NMI

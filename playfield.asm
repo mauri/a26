@@ -4,12 +4,15 @@
     include "vcs.h"
     include "macro.h"
 
-    SEG
+    SEG.U data
+    ORG $80
+
+pattern ds 1
+
+    SEG code
     ORG $F000       ; start of cartridge memory area
 
 ;;
-PATTERN = $80       ; storage location 
-TIMETOCHANGE = 80   ; 1/speed of the animation
 
 ;;
 Reset
@@ -44,33 +47,38 @@ VerticalBlank
     bne VerticalBlank       ; branch to VerticalBlank if zero is clear 
 
 ; horsing around to check the WSYNC is needed before resetting VBLANK
-    lda PATTERN
+    lda pattern
     sta PF1
-    adc PATTERN
-    adc PATTERN
-    adc PATTERN
-    sta PATTERN
+    adc pattern
+    adc pattern
+    adc pattern
+    sta pattern
 
     ldx #0
     stx WSYNC
     stx VBLANK ; end VBLANK
 
 ;--------------------------------------------------+
-; start picture 
+; start picture      (228 color-cycles per scanline)
 Picture
     stx COLUBK              ; set background color
-    
+
     stx PF1                 ; set playfield1
     stx PF2                 ; set playfield2 (notice in the image how it's reversed)
     stx PF0                 ; set playfield0 (notice it's reversed and only the high nibble used)
 
-    REPEAT 7        ; messing up with the playfield in the middle of the scanline
-        nop         ; 
-    REPEND          ; 
-    inc PF1         ;
+    REPEAT 11               ; 
+        nop                 ; 
+    REPEND                  ;
+    
+    lda #0                  ; clear the playfield registers in the middle of the scanline
+    sta PF1
+    sta PF0
+    sta PF2                 ; here we are at 46 cpu-cycles into the scanline ~> 138 color-cycles
+                            ; efectively before reaching half the screen
 
     inx                     ; increment x
-    sta PATTERN
+    sta pattern
     sta WSYNC               ; wait for scanline to finish
     cpx #192                ; compare and sets zero flag if x == 192
     bne Picture             ; jump if not zero
