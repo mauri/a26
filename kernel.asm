@@ -1,6 +1,6 @@
 ; Simple kernel that renders a rainbow 
 
-; Based on the stella programming series with some adjustments to
+; Based on the stella programming series with some adjustments for
 ; correct VBLANK handling
 ;
     processor 6502
